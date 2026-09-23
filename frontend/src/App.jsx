@@ -42,12 +42,8 @@ export default function App() {
       const message = await api.sendMessage(text);
 
       if (persistence) {
-        // It was saved to Neon.
-        // Refresh so it becomes part of persistent history.
         await refresh();
       } else {
-        // It was NOT saved.
-        // Keep it only in this browser's current React state.
         setTemporaryMessages((prev) => [message, ...prev]);
       }
 
