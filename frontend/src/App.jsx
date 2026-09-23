@@ -4,7 +4,7 @@ import MessageBox from "./components/MessageBox.jsx";
 import MessageList from "./components/MessageList.jsx";
 import Toggle from "./components/Toggle.jsx";
 
-const TITLE = "College Seminar Live Demo"; // change me
+const TITLE = "Database Integration Demo"; // change me
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -58,11 +58,6 @@ export default function App() {
     <div className={uiGood ? "app good" : "app bad"}>
       <main className="wrap">
         <h1>{TITLE}</h1>
-
-        <div className="status">
-          <span>Persistence: {persistence ? "ON" : "OFF"}</span>
-          <span>UI Mode: {uiGood ? "GOOD" : "BAD"}</span>
-        </div>
 
         <div className="toggles">
           <Toggle label="Persistence" on={persistence} onLabel="ON" offLabel="OFF" onClick={togglePersistence} />
