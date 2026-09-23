@@ -3,13 +3,13 @@ import { prisma } from "../db/prisma.js";
 let persistence = true;
 
 export const getPersistence = () => persistence;
-export const setPersistence = (value) => (persistence = value);
+export const setPersistence = (value) => {
+  persistence = value;
+  return persistence;
+};
 
 export async function listMessages() {
-  if (!persistence) {
-    return [];
-  }
-
+  // ALWAYS return persisted history.
   return prisma.message.findMany({
     orderBy: { createdAt: "desc" },
     take: 100,
@@ -17,15 +17,19 @@ export async function listMessages() {
 }
 
 export async function createMessage(text) {
-  if (!persistence) {
-    return {
-      id: crypto.randomUUID(),
-      text,
-      createdAt: new Date().toISOString(),
-    };
+  if (persistence) {
+    // Persistence ON → save permanently
+    return prisma.message.create({
+      data: { text },
+    });
   }
 
-  return prisma.message.create({
-    data: { text },
-  });
+  // Persistence OFF → return the message,
+  // but DO NOT save it to Neon.
+  return {
+    id: `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    text,
+    createdAt: new Date().toISOString(),
+    persistent: false,
+  };
 }

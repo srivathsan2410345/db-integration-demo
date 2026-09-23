@@ -12,10 +12,15 @@ export default function App() {
   const [uiGood, setUiGood] = useState(true); // local, presentation only
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+  const [temporaryMessages, setTemporaryMessages] = useState([]);
 
   const refresh = useCallback(async () => {
     try {
-      const [msgs, settings] = await Promise.all([api.getMessages(), api.getSettings()]);
+      const [msgs, settings] = await Promise.all([
+        api.getMessages(),
+        api.getSettings(),
+      ]);
+
       setMessages(msgs);
       setPersistence(settings.persistence);
       setError("");
@@ -32,9 +37,20 @@ export default function App() {
 
   async function handleSend(text) {
     setSending(true);
+
     try {
-      await api.sendMessage(text);
-      await refresh();
+      const message = await api.sendMessage(text);
+
+      if (persistence) {
+        // It was saved to Neon.
+        // Refresh so it becomes part of persistent history.
+        await refresh();
+      } else {
+        // It was NOT saved.
+        // Keep it only in this browser's current React state.
+        setTemporaryMessages((prev) => [message, ...prev]);
+      }
+
       return true;
     } catch (e) {
       setError(e.message);
@@ -69,7 +85,9 @@ export default function App() {
         {error && <p className="error">{error}</p>}
 
         <h2>Messages</h2>
-        <MessageList messages={messages} />
+        <MessageList
+          messages={[...temporaryMessages, ...messages]}
+        />
       </main>
     </div>
   );
